@@ -1,0 +1,4 @@
+*.o
+*.elf
+*.bin
+/tools/stage2-checksum
