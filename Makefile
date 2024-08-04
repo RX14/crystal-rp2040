@@ -1,9 +1,13 @@
 O = out
+CRYSTAL_SVD ?= crystal-svd
 
 .PHONY: blinky
 blinky: $(O)/blinky.elf
 
-$(O)/blinky.o: src/blinky.cr
+src/bindings/*.cr: src/bindings/rp2040.svd $(CRYSTAL_SVD)
+	$(CRYSTAL_SVD) src/bindings/rp2040.svd
+
+$(O)/blinky.o: src/blinky.cr src/bindings/*.cr
 	mkdir -p $(O)
 	crystal build --release --cross-compile --target arm-none-eabi --mcpu cortex-m0plus --prelude empty -o "$@" "$<" > /dev/null
 
