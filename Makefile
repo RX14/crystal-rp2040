@@ -1,13 +1,19 @@
-blinky.o: blinky.cr
+O = out
+
+.PHONY: blinky
+blinky: $(O)/blinky.elf
+
+$(O)/blinky.o: src/blinky.cr
+	mkdir -p $(O)
 	crystal build --release --cross-compile --target arm-none-eabi --mcpu cortex-m0plus --prelude empty -o "$@" "$<" > /dev/null
 
-blinky.prechecksum.elf: blinky.o boot/pico-boot-stage2.o
+$(O)/blinky.prechecksum.elf: $(O)/blinky.o $(O)/pico-boot-stage2.o
 	ld.lld --emit-relocs --gc-sections -T boot/rp2040.ld --defsym=__flash_size=2048K -o "$@" $^
 
-blinky.elf: blinky.prechecksum.elf tools/stage2-checksum
+$(O)/blinky.elf: $(O)/blinky.prechecksum.elf tools/stage2-checksum
 	tools/stage2-checksum "$<" "$@"
 
-boot/pico-boot-stage2.o: boot/pico-boot-stage2.S boot/rp2040-boot-stage2.S
+$(O)/pico-boot-stage2.o: boot/pico-boot-stage2.S boot/rp2040-boot-stage2.S
 	clang --target=arm-none-eabi -mcpu=cortex-m0plus -c -o "$@" "$<"
 
 tools/stage2-checksum: tools/stage2-checksum.cr
@@ -15,7 +21,7 @@ tools/stage2-checksum: tools/stage2-checksum.cr
 
 .PHONY: clean
 clean:
-	rm -f blinky.o blinky.prechecksum.elf blinky.elf boot/pico-boot-stage2.o
+	rm -rf $(O)
 
 .PHONY: clean-tools
 clean-tools:

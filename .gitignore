@@ -1,4 +1,2 @@
-*.o
-*.elf
-*.bin
+/out/
 /tools/stage2-checksum
