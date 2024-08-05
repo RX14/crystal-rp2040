@@ -19,6 +19,14 @@ struct Int
   def bits_set?(mask) : Bool
     (self & mask) == mask
   end
+
+  def times(&block : self ->) : Nil
+    i = self ^ self
+    while i < self
+      yield i
+      i &+= 1
+    end
+  end
 end
 
 struct UInt32
@@ -39,6 +47,18 @@ struct Enum
   end
 end
 
+def loop(&)
+  while true
+    yield
+  end
+end
+
+struct UInt8
+  def self.new!(value) : self
+    value.to_u8!
+  end
+end
+
 fun main2
   # LED = GPIO25
 
@@ -51,5 +71,13 @@ fun main2
 
   IO_BANK0::GPIO25_CTRL.funcsel = :sio25
   SIO::GPIO_OE_SET.gpio_oe_set = 1_u32.unsafe_shl(25)
-  SIO::GPIO_OUT_SET.gpio_out_set = 1_u32.unsafe_shl(25)
+
+  loop do
+    23437.times do
+      XOSC::COUNT.count = 255
+      while XOSC::COUNT.count != 0
+      end
+    end
+    SIO::GPIO_OUT_XOR.gpio_out_xor = 1_u32.unsafe_shl(25)
+  end
 end
